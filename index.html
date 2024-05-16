@@ -1,0 +1,131 @@
+<html lang="">
+<head>
+    <style>
+        body {
+            font-family: Cambria,serif;
+            font-size: 16px;
+            text-align: center;
+            align-content: center;
+            margin-top: 5%;
+            margin-left: 20%;
+            margin-right: 20%;
+            flex-direction: column;
+        }
+
+        canvas, i, div, input {
+            padding: 15px;
+            border: 15px;
+        }
+
+    </style>
+    <title>Zadanie z JavaScript</title>
+    <script type="text/JavaScript">
+        let startTime;
+        let endTime;
+        let quantitySamples = 5;
+        let quantityPressButton = 0;
+        let yourTimes = [];
+        let gameStatus;
+        let bestScoreEver=Number.MAX_VALUE;
+
+        document.addEventListener("keypress", event => {
+            if (event.key === " ") {
+                checkSpeed();
+            }
+        })
+
+        async function startGame(quantity) {
+            this.quantity = quantity;
+            newRectangle();
+            gameStatus = true;
+            document.getElementById("stop").style.visibility = "visible";
+            let j = 0;
+            while (j < quantity) {
+                if (gameStatus) {
+                    let randomTime = Math.random();
+                    startTime = Date.now();
+                    await new Promise(res => setTimeout(res, 1500 * randomTime));
+                    newRectangle();
+                }
+                j++;
+            }
+            gameStatus = false;
+            document.getElementById("stop").style.visibility = "hidden";
+            scores();
+        }
+
+        function stopGame() {
+            gameStatus = false;
+            document.getElementById("stop").style.visibility = "hidden";
+
+        }
+
+        function newRectangle() {
+            quantityPressButton = 0;
+            let canvas = document.querySelector("#square");
+            let context = canvas.getContext("2d");
+            let color = Math.floor(Math.random() * 16777215).toString(16);
+            context.fillStyle = "#" + color;
+            context.fillRect(0, 0, 160, 160);
+        }
+
+        function checkSpeed() {
+            if (gameStatus) {
+                endTime = Date.now();
+                yourTimes.push((endTime - startTime).toFixed(0));
+                quantityPressButton++;
+                document.getElementById("timestamp").innerHTML = "Clicks: " + quantityPressButton;
+            }
+        }
+
+        function scores() {
+            yourTimes = yourTimes.sort(function (a, b) {
+                return a - b
+            });
+
+            if (+yourTimes[0] < +bestScoreEver) bestScoreEver = +yourTimes[0];
+
+            if(yourTimes[0] !== undefined) {
+
+                let bestScore;
+                let avgScore=0;
+                let worstScore;
+                let clicks;
+                let best;
+
+                for (let i in yourTimes) {
+                    avgScore += +(yourTimes[i]);
+                }
+                bestScore = "<br />Best: " + yourTimes[0] + " ms";
+                avgScore = "<br />Avg score: " + (avgScore / yourTimes.length).toFixed(0) + " ms";
+                worstScore = "<br />Worst score: " + yourTimes[yourTimes.length - 1] + " ms";
+                clicks = "<br />Quantity push button: " + yourTimes.length + " clicks";
+                best = "<br />Best score ever: " + bestScoreEver + " ms";
+
+                document.getElementById("timestamp").innerHTML = bestScore + avgScore + worstScore + clicks + best;
+                yourTimes.length = 0;
+            }
+        }
+
+        function quantityOfRectangle() {
+            let quantityRectangle = document.getElementById("number").value;
+            quantitySamples = +(quantityRectangle);
+        }
+    </script>
+</head>
+
+<body>
+<h2>This is a game, push start and click on rectangle(mouse or space), show me how you are fast :) </h2><br/>
+<canvas id="square" width=160 height=160 onclick="checkSpeed()"></canvas>
+<br/>
+<input type="button" id="start" value="start" onclick="startGame(quantitySamples)"/>
+<input type="button" id="stop" value="stop" style="visibility: hidden"  onclick="stopGame()"/>
+<br/>
+<i>Quantity of rectangles: </i>
+<input type="number" id="number" value="5" onchange="quantityOfRectangle()" onclick="quantityOfRectangle()"/>
+<br/>
+<div id="timestamp"></div>
+
+</body>
+
+</html>
